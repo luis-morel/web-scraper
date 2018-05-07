@@ -39,8 +39,6 @@ app.get("/", function (req, res) {
         })
         .catch(function (error) {
             console.log(error);
-            res.send("We're sorry, there appears to be a problem with the site. " +
-                "Please try refreshing the page in a few minutes.");
         });
 
     // Console Message
@@ -93,8 +91,6 @@ app.get("/", function (req, res) {
             })
             .catch(function (error) {
                 console.log(error);
-                res.send("We're sorry, there appears to be a problem with the site. " +
-                    "Please try refreshing the page in a few minutes.");
             });
 
     });
@@ -113,16 +109,14 @@ app.get("/comments/:id", function (req, res) {
     // Retrieve Requested Headline
     db.Headlines.findOne(
         { _id: req.params.id })
-        .populate("comments")
+        .populate({ path: "comments", select: "message" })
         .then(function (dbHeadline) {
-            console.log("[Comments Route] dbHeadline.comments:\n", dbHeadline.comments);
+            console.log("[Comments Route] dbHeadline:\n", dbHeadline);
             var hbsObject = { document: dbHeadline };
             res.render("comments", hbsObject);
         })
         .catch(function (error) {
             console.log(error);
-            res.send("We're sorry, there appears to be a problem with the site. " +
-                "Please try refreshing the page in a few minutes.");
         });
 
 });
@@ -132,11 +126,12 @@ app.post("/comments/:id", function (req, res) {
     console.log("[Post Route], req.body: ", req.body);
     db.Comments.create(req.body)
         .then(function (dbComment) {
-            console.log("[Post Route], dbComment", dbComment);
+            console.log("\n[Post Route], dbComment", dbComment);
+            console.log("\nreq.params.id: ", req.params.id);
             return db.Headlines.findOneAndUpdate(
                 { _id: req.params.id },
-                { comments: dbComment._id },
-                { new: true });
+                { $push: { comments: dbComment._id } },
+                { new: true })
         })
         .then(function (dbHeadline) {
             console.log("\nComment Posted Successfully!");

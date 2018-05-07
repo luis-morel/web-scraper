@@ -9,7 +9,7 @@ var HeadlinesSchema = new Schema({
     // Mongo DB Document Fields For Headlines Collection
     title: {
         type: String,
-        require: true
+        required: true
     },
     summary: {
         type: String,
@@ -24,10 +24,10 @@ var HeadlinesSchema = new Schema({
         required: true
     },
     // Linking Headlines Model to Comments Model Via 'Ref' Property
-    comments: {
+    comments: [{
         type: Schema.Types.ObjectId,
         ref: "Comments"
-    }
+    }]
 });
 
 // Using Mongoose .model() To Create 'Headlines' Model Using 'HeadlinesSchema'

@@ -25,16 +25,17 @@ $(document).ready(function () {
         if (event.which == 13) {
 
             var comment = { message: $(this).val().trim() };
+            var headlineId = $(this).attr("data-id")
 
             $("#commentInput").val("");            
 
              $.ajax({
                  method: "POST",
-                 url: "/comments/" + $(this).attr("data-id"),
+                 url: "/comments/" + headlineId,
                  data: comment
              })
              .then(function () {
-                var url = window.location.origin + pathname;
+                var url = window.location.origin + "/comments/" + headlineId;
                 window.location.assign(url);
              });
 
