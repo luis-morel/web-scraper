@@ -1,0 +1,53 @@
+/* Headline Styling */
+
+.commentArea {
+    background-color: whitesmoke;
+    text-align: center;
+}
+
+.commentArea button {
+    background-color: unset;
+    border: 0;
+    color: lightskyblue;
+    font-weight: bold;
+    padding: 5px;
+}
+
+.commentArea button:hover {
+    background-color: lightskyblue;
+    border-radius: 3px;
+    color: white;
+    font-weight: bold;
+} 
+
+.headline {
+    margin-bottom: 5px;
+    text-align: justify;
+}
+
+.headlineContent {
+    margin-bottom: 5px;
+}
+
+.headlineImage {
+    margin-bottom: 3px;
+}
+
+.headlineImage img {
+    margin-bottom: 3px;
+    width: 100%;
+}
+
+.headlineRow {
+    margin-bottom: 25px;
+}
+
+.headlineTitle a {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.separator {
+    border-top: 1.5px solid #eee;
+    margin: 11px 0 0 0;
+}
