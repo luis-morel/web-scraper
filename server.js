@@ -101,24 +101,54 @@ app.get("/", function (req, res) {
 
 });
 
+app.get("/comments", function (req, res) {
+
+    // Return Path: /comments/id
+    res.status(200).json('/comments/' + req.query.headlineId);
+
+});
+
 app.get("/comments/:id", function (req, res) {
 
     // Retrieve Requested Headline
     db.Headlines.findOne(
         { _id: req.params.id })
-        .populate("Comments")
+        .populate("comments")
         .then(function (dbHeadline) {
-            console.log("[Comments Route] dbHeadline:\n", dbHeadline);
+            console.log("[Comments Route] dbHeadline.comments:\n", dbHeadline.comments);
             var hbsObject = { document: dbHeadline };
             res.render("comments", hbsObject);
         })
         .catch(function (error) {
             console.log(error);
             res.send("We're sorry, there appears to be a problem with the site. " +
-            "Please try refreshing the page in a few minutes.");
+                "Please try refreshing the page in a few minutes.");
         });
-    
+
 });
+
+app.post("/comments/:id", function (req, res) {
+
+    console.log("[Post Route], req.body: ", req.body);
+    db.Comments.create(req.body)
+        .then(function (dbComment) {
+            console.log("[Post Route], dbComment", dbComment);
+            return db.Headlines.findOneAndUpdate(
+                { _id: req.params.id },
+                { comments: dbComment._id },
+                { new: true });
+        })
+        .then(function (dbHeadline) {
+            console.log("\nComment Posted Successfully!");
+            console.log("\ndbHeadline: ", dbHeadline);
+            res.status(200).json('/comments/' + req.params.id);
+        })
+        .catch(function (error) {
+            res.json(error);
+        });
+
+});
+
 
 // Initialize Server
 var PORT = 3000;

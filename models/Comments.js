@@ -7,7 +7,7 @@ var Schema = mongoose.Schema;
 // Using Mongoose Schema Constructor To Create New Schema Object
 var CommentsSchema = new Schema({
     // Mongo DB Document Fields For Comments Collection
-    body: String
+    message: String
 });
 
 // Using Mongoose .model() To Create 'Comments' Model Using 'CommentsSchema'
