@@ -116,7 +116,7 @@ app.delete("/comments/:id", function (req, res) {
 
 
 // Initialize Server
-var PORT = 3000;
+var PORT = process.env.PORT || 3000;
 app.listen(PORT, function () {
     console.log("App listening on port " + PORT + "!");
 });
