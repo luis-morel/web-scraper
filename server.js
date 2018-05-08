@@ -30,76 +30,34 @@ app.set("view engine", "handlebars");
 // App Routes
 app.get("/", function (req, res) {
 
-    // Retrieve All Headlines From Mongo DB and Store In Array
-    var headlines = [];
-
+    // Retrieve All Headlines From DB, Scrape Web, and Update Mongo DB If New Headlines Available
     db.Headlines.find({})
         .then(function (dbData) {
-            headlines = dbData;
+            webScrape(dbData, function (newHeadlines) {
+                dbUpdate(newHeadlines, function (completed) {
+                    if (completed) {
+                        // Send All Headlines to Handlebars
+                        db.Headlines.find({})
+                            .then(function (dbDocuments) {
+                                var hbsObject = { document: dbDocuments };
+                                res.render("index", hbsObject);
+                            })
+                            .catch(function (error) {
+                                console.log(error);
+                            });
+                    };
+                });
+            });
         })
         .catch(function (error) {
             console.log(error);
         });
 
-    // Console Message
-    console.log("\n<><><> Scrapping NY Times Science/Space Headlines <><><>\n");
-
-    // Scrape Site
-    request("https://www.nytimes.com/section/science/space", function (error, response, html) {
-
-        // Load HTML Into Cheerio
-        var $ = cheerio.load(html);
-
-        // Scrape Each 'Article' element (with class 'story') within an 'li' element
-        $("li article.story").each(function (i, element) {
-
-            var title = $(element).find("h2 a").text();
-            var summary = $(element).find("p.summary").text().trim();
-            var photoLink = $(element).find("img").attr("src");
-            var storyLink = $(element).find("h2 a").attr("href");
-
-            // If Variables Truthy, Check For Duplicates, Then Store Non-Duplicate in Mongo DB
-            if (photoLink && storyLink && summary && title) {
-
-                var duplicate = false;
-
-                for (let i = 0; i < headlines.length; i++) {
-                    if (headlines[i].storyLink === storyLink) {
-                        duplicate = true;
-                    }
-                };
-                if (!duplicate) {
-                    // Insert Data\Object Into MongoDB
-                    db.Headlines.create(
-                        { title, summary, photoLink, storyLink },
-                        function (error, dbDocument) {
-                            if (error) throw error;
-                            else console.log("\nAdded: ", dbDocument);
-                        });
-                };
-
-            };
-
-        });
-
-        // Log 'Success' and Send All Headlines to Handlebars
-        console.log("Scrape Complete");
-        db.Headlines.find({})
-            .then(function (dbDocuments) {
-                var hbsObject = { document: dbDocuments };
-                res.render("index", hbsObject);
-            })
-            .catch(function (error) {
-                console.log(error);
-            });
-
-    });
-
 });
 
 app.get("/comments", function (req, res) {
 
-    // Return Path: /comments/id
+    // Return Path: '/comments/id'
     res.status(200).json('/comments/' + req.query.headlineId);
 
 });
@@ -111,7 +69,6 @@ app.get("/comments/:id", function (req, res) {
         { _id: req.params.id })
         .populate({ path: "comments", select: "message" })
         .then(function (dbHeadline) {
-            console.log("[Comments Route] dbHeadline:\n", dbHeadline);
             var hbsObject = { document: dbHeadline };
             res.render("comments", hbsObject);
         })
@@ -123,23 +80,36 @@ app.get("/comments/:id", function (req, res) {
 
 app.post("/comments/:id", function (req, res) {
 
-    console.log("[Post Route], req.body: ", req.body);
     db.Comments.create(req.body)
         .then(function (dbComment) {
-            console.log("\n[Post Route], dbComment", dbComment);
-            console.log("\nreq.params.id: ", req.params.id);
             return db.Headlines.findOneAndUpdate(
                 { _id: req.params.id },
                 { $push: { comments: dbComment._id } },
                 { new: true })
         })
         .then(function (dbHeadline) {
-            console.log("\nComment Posted Successfully!");
-            console.log("\ndbHeadline: ", dbHeadline);
             res.status(200).json('/comments/' + req.params.id);
         })
         .catch(function (error) {
             res.json(error);
+        });
+
+});
+
+app.delete("/comments/:id", function (req, res) {
+
+    db.Comments.findOneAndRemove(
+        { _id: req.params.id })
+        .then(function (dbDocument) {
+            return db.Headlines.findOneAndUpdate(
+                { _id: req.body.headlineId },
+                { $pull: { comments: req.params.id } })
+                .then(function (dbHeadline) {
+                    res.status(200).json('/comments/' + req.body.headlineId);
+                })
+                .catch(function (error) {
+                    res.json(error);
+                });
         });
 
 });
@@ -150,3 +120,71 @@ var PORT = 3000;
 app.listen(PORT, function () {
     console.log("App listening on port " + PORT + "!");
 });
+
+
+// Web Scraper Function
+function webScrape(dbHeadlines, callback) {
+
+    // Console Message
+    console.log("\n ---- Scrapping NY Times Science/Space Headlines ----\n");
+
+    // Object Array To Store Scraped Articles
+    var newHeadlines = [];
+
+    // Scrape Site
+    request("https://www.nytimes.com/section/science/space", function (error, response, htmlBody) {
+
+        // Load HTML Into Cheerio
+        var $ = cheerio.load(htmlBody);
+
+        // Scrape Each 'Article' element (with class 'story') within an 'li' element
+        $("li article.story").each(function (i, element) {
+
+            var title = $(element).find("h2 a").text();
+            var summary = $(element).find("p.summary").text().trim();
+            var photoLink = $(element).find("img").attr("src");
+            var storyLink = $(element).find("h2 a").attr("href");
+
+            // If Variables Truthy, Check For Duplicates, Then Push Non-Duplicate To Object Array
+            if (photoLink && storyLink && summary && title) {
+                var duplicate = false;
+                for (let i = 0; i < dbHeadlines.length; i++) {
+                    if (dbHeadlines[i].storyLink === storyLink) {
+                        duplicate = true;
+                    }
+                };
+                if (!duplicate) {
+                    newHeadlines.push({ title, summary, photoLink, storyLink });
+                };
+            };
+
+        });
+
+        // Returning Array of Objects
+        return callback(newHeadlines);
+
+    });
+
+};
+
+// MongoDB Update Function
+function dbUpdate(newHeadlines, callback) {
+
+    var completed = true;
+    // Insert New Headlines Into MongoDB
+    if (newHeadlines.length > 0) {
+        db.Headlines.insertMany(newHeadlines, function (error, dbDocuments) {
+            if (error) {
+                completed = false;
+                throw error;
+            }
+            else {
+                return callback(completed);
+            }
+        });
+    }
+    else {
+        return callback(completed);
+    }
+
+};

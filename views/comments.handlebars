@@ -2,7 +2,7 @@
 <nav class="navbar navbar-default">
     <div class="container-fluid">
         <div class="navbar-header">
-            <a class="navbar-brand" href="/">Web Scrape - NY Times Science/Space Headlines</a>
+            <a id="navbarLink" class="navbar-brand" href="/">Web Scrape - NY Times Science/Space Headlines</a>
         </div>
     </div>
 </nav>
@@ -36,7 +36,7 @@
     </div>
 
     <!-- Comment Form -->
-    <div class="row">
+    <!-- <div class="row">
         <div class="col-md-2"></div>
         <div class="col-md-8">
             <form method="post" enctype="text/plain">
@@ -44,18 +44,29 @@
             </form>
         </div>
         <div class="col-md-2"></div>
-    </div>
+    </div> -->
 
     <!-- Comments -->
     <div class="row">
         <div class="col-md-2"></div>
         <div class="col-md-8">
-            <h3 id="commentsHeader">Comments</h3>
+            <div class="commentPanel">
+                <h4>
+                    <img src="/images/message.png"> Comment
+                </h4>
+                <form method="post" enctype="text/plain">
+                    <textarea id="commentInput" data-id={{document._id}} placeholder="Write a comment..."></textarea>
+                </form>
+            </div>
             {{#if document.comments}} {{#each document.comments}}
-            <div class="comment">{{message}}</div>
+            <div class="comments">
+                {{message}}
+                <button id="commentDelete" data-id={{_id}} type="submit">Delete</button>
+            </div>
             {{/each}} {{else}}
-            <h3>Be the first to write a comment!</h3>
+            <div class="noComments">No Comments.</div>
             {{/if}}
+
         </div>
         <div class="col-md-2"></div>
     </div>

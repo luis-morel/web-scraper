@@ -8,7 +8,7 @@
     -webkit-box-shadow: 0 8px 6px -6px #999;
     -moz-box-shadow: 0 8px 6px -6px #999;
     background-color: rgb(32,64,95); /* For browsers that don't support gradient coloring */
-    background: linear-gradient(to top, rgb(41, 76, 112), rgb(144, 176, 211));
+    background: linear-gradient(to top, rgb(54, 90, 126), rgb(219,220,220));
     box-shadow: 0 8px 6px -6px #999;
     height: 77px;
     margin-bottom: 42px;
@@ -22,12 +22,12 @@
 
 /* Headline Styling */
 
-.commentArea {
+.commentBar {
     background-color: whitesmoke;
     text-align: center;
 }
 
-.commentArea button {
+.commentBar button {
     background-color: unset;
     border: 0;
     color: lightskyblue;
@@ -35,7 +35,7 @@
     padding: 5px;
 }
 
-.commentArea button:hover {
+.commentBar button:hover {
     background-color: lightskyblue;
     border-radius: 3px;
     color: white;
@@ -78,9 +78,59 @@
 /* Comments Styling */
 
 #commentInput {
+    border: none;
     border-radius: 5px;
     height: 75px;
     padding: 5px;
     width: 100%;
     resize: none;
+}
+
+.comments button {
+    background-color: unset;
+    border: 0;
+    color: lightskyblue;
+    float: right;
+    font-weight: bold;
+    padding: 5px;
+    width: 77px;
+}
+
+.comments button:hover {
+    background-color: lightskyblue;
+    border-radius: 3px;
+    color: white;
+    font-weight: bold;
+}
+
+.commentPanel {
+    background-color: whitesmoke;
+    border-radius: 5px;
+    margin-bottom: 15px;
+    padding: 1px 20px 20px;
+}
+
+.commentPanel h4 {
+    color: lightskyblue;
+    text-align: center;
+}
+
+.commentPanel img {
+    height: 20px;
+    width: 20px;
+}
+
+.comments {
+    background-color: whitesmoke;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    padding: 20px;
+}
+
+.noComments {
+    text-align: center;
+}
+
+textarea::placeholder {
+    color: lightgray;
 }
