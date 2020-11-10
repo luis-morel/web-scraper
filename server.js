@@ -1,5 +1,5 @@
 // Requiring Node Packages
-var bodyParser = require("body-parser"); // Body-Parsing Middleware
+// var bodyParser = require("body-parser"); // Body-Parsing Middleware
 var cheerio = require("cheerio"); // HTML Parser\Scraper
 var express = require("express"); // Web Application Framework
 var handlebars = require("express-handlebars"); // JS Templating Engine
@@ -11,7 +11,7 @@ var request = require("request"); // HTTP Request Client
 var db = require("./models");
 
 // Configuring and Connecting to Mongo DB
-var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/Headlines";
+var MONGODB_URI = process.env.MLAB_MONGODB_URI || "mongodb://localhost/WebScraper";
 mongoose.Promise = Promise; // Set Mongoose To Leverage Built-in JS ES6 Promises
 mongoose.connect(MONGODB_URI);
 
@@ -21,7 +21,9 @@ app.use(express.static("public")); // Serving 'Public' Folder As Static Director
 
 // Middleware Config
 app.use(logger("dev")); // Morgan Request Logger
-app.use(bodyParser.urlencoded({ extended: true })); // Handles Form Submissions
+// app.use(bodyParser.urlencoded({ extended: true })); // Handles Form Submissions
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
 // Initializing HandleBars
 app.engine("handlebars", handlebars({ defaultLayout: "main" }));
@@ -116,7 +118,7 @@ app.delete("/comments/:id", function (req, res) {
 
 
 // Initialize Server
-var PORT = process.env.PORT || 3000;
+var PORT = process.env.PORT || 3021;
 app.listen(PORT, function () {
     console.log("App listening on port " + PORT + "!");
 });
